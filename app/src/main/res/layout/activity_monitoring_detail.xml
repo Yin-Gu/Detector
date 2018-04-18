@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.condition_monitoring.MonitoringDetailActivity">
+
+    <include layout="@layout/layout_title_bar"></include>
+
+    <TextView
+        android:id="@+id/tv_alarm_tint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/alarm_hint"
+        android:textColor="@color/darkRed"
+        android:textSize="13sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:background="@color/white"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp">
+
+        <TextView
+            android:id="@+id/tv_motor_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:textSize="13sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/tv_motor_name"
+            android:layout_toRightOf="@id/tv_motor_name"
+            android:text="@string/single_motor_value"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tv_single_temperature_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_motor_name"
+            android:layout_marginTop="15dp"
+            android:textSize="13sp"
+            android:text="@string/temperature"/>
+        <TextView
+            android:id="@+id/tv_single_temperature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:layout_marginTop="15dp"
+            android:layout_below="@id/tv_motor_name"
+            android:layout_toRightOf="@id/tv_single_temperature_hint"
+            android:layout_toEndOf="@id/tv_single_temperature_hint" />
+
+        <TextView
+            android:id="@+id/tv_single_current_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/tv_single_temperature_hint"
+            android:textSize="13sp"
+            android:text="@string/current"/>
+        <TextView
+            android:id="@+id/tv_single_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/tv_single_temperature"
+            android:layout_toRightOf="@id/tv_single_current_hint"
+            android:layout_toEndOf="@id/tv_single_current_hint"/>
+
+        <TextView
+            android:id="@+id/tv_single_voltage_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="100dp"
+            android:layout_below="@id/tv_motor_name"
+            android:layout_toEndOf="@id/tv_single_temperature"
+            android:layout_toRightOf="@id/tv_single_temperature"
+            android:textSize="13sp"
+            android:text="@string/voltage"/>
+        <TextView
+            android:id="@+id/tv_single_voltage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:layout_marginTop="15dp"
+            android:layout_below="@id/tv_motor_name"
+            android:layout_toRightOf="@id/tv_single_voltage_hint"
+            android:layout_toEndOf="@id/tv_single_voltage_hint"/>
+    </RelativeLayout>
+    
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="80dp"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:background="@color/white"-->
+        <!--android:orientation="vertical">-->
+
+        <!--<TextView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="5dp"-->
+            <!--android:text="@string/single_motor_value"-->
+            <!--android:textSize="13sp" />-->
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="30dp"-->
+            <!--android:orientation="horizontal">-->
+
+            <!--<TextView-->
+                <!--android:id="@+id/Dtv_device_parameters1"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="电机电流：50A"-->
+                <!--android:textSize="13sp" />-->
+
+            <!--<TextView-->
+                <!--android:id="@+id/Dtv_device_parameters2"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="50dp"-->
+                <!--android:text="减速机温度：24.2°C"-->
+                <!--android:textSize="13sp" />-->
+        <!--</LinearLayout>-->
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="30dp"-->
+            <!--android:orientation="horizontal">-->
+
+            <!--<TextView-->
+                <!--android:id="@+id/Dtv_device_parameters3"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="电机温度：92.3°C"-->
+                <!--android:textSize="13sp" />-->
+
+            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+                <!--&lt;!&ndash;android:id="@+id/Dtv_device_parameters4"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_marginLeft="50dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:text="皮带运行速度30.02"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:textSize="13sp" />&ndash;&gt;-->
+        <!--</LinearLayout>-->
+    <!--</LinearLayout>-->
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginBottom="10dp"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="开始时间："-->
+            <!--android:textSize="13sp" />-->
+
+        <!--<EditText-->
+            <!--android:layout_width="80dp"-->
+            <!--android:layout_height="wrap_content" />-->
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="结束时间："-->
+            <!--android:textSize="13sp" />-->
+
+        <!--<EditText-->
+            <!--android:layout_width="80dp"-->
+            <!--android:layout_height="wrap_content" />-->
+
+    <!--</LinearLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="测点：" />
+
+        <Spinner
+            android:id="@+id/point_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/measuring_point" />
+    </LinearLayout>
+
+    <lecho.lib.hellocharts.view.LineChartView
+        android:id="@+id/chart"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="20dp"/>
+
+</LinearLayout>

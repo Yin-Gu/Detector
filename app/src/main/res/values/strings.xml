@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">工控监控云平台</string>
+
+    <!--Common Message-->
+    <string name="msg_back">返回</string>
+    <string name="msg_confirm">确认</string>
+    <string name="msg_cancel">取消</string>
+    <string name="msg_hint">提示</string>
+
+    <!--主页面-->
+    <string name="homepage_title">工控监控云平台</string>
+
+    <string name="condition_monitoring">状态监控</string>
+    <string name="data_monitoring">数据监控</string>
+    <string name="abnormal_alarm">异常报警</string>
+
+    <string name="equipment_management">设备运维</string>
+    <string name="equipment_maintenance">设备维保</string>
+    <string name="equipment_inspection">设备巡检</string>
+    <string name="hidden_management">隐患管理</string>
+
+    <string name="comprehensive_report">综合报表</string>
+    <string name="event_statistics">事件统计</string>
+    <string name="data_analysis">数据分析</string>
+
+    <!--数据监控-->
+    <string name="alarm_prompt">报警提示：</string>
+    <string name="equipment_name">设备名称：</string>
+    <string name="LED">指示灯：</string>
+    <string name="single_motor_value">当前测值</string>
+    <string name="temperature">温度：</string>
+    <string name="current">电流：</string>
+    <string name="voltage">电压：</string>
+    <string name="normal">正常</string>
+    <string name="alarm">报警</string>
+    <string name="title_activity_login">demo</string>
+
+    <!--监控详细-->
+    <string name="monitoring_detail">监控详情</string>
+    <string name="begin_time">开始时间</string>
+    <string name="alarm_hint">该部件电机温度过高，请尽快处理</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">账号</string>
+    <string name="prompt_password">密码</string>
+    <string name="action_sign_in">登录</string>
+    <string name="action_reset">重置</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">账号不存在</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">密码错误</string>
+    <string name="error_field_required">此空必填</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+
+</resources>
