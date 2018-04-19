@@ -29,9 +29,8 @@ public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAd
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_data_monitoring,parent,false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+                .inflate(R.layout.item_data_monitoring, parent, false);
+        return new ViewHolder(view);
     }
 
     private ItemClickListener itemClickListener;
@@ -42,6 +41,12 @@ public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAd
 
     @Override
     public void onBindViewHolder(ViewHolder holder,int position){
+        //奇数项为白色
+        if ((position & 0x1) == 0) {
+            holder.view.setBackgroundColor(Color.WHITE);
+        } else {
+            holder.view.setBackgroundColor(Color.parseColor("#FFF5EE"));
+        }
         holder.view.setTag(position);
         DataMonitoringItem item = mItemList.get(position);
         holder.equipmentName.setText(item.getEquipmentName());
@@ -54,6 +59,7 @@ public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAd
         holder.current.setText(item.getElectricCurrent());
         holder.voltage.setText(item.getVoltage());
     }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.tv_equipment_name) TextView equipmentName;
         @BindView(R.id.iv_LED) ImageView status;
@@ -61,7 +67,7 @@ public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAd
         @BindView(R.id.tv_current) TextView current;
         @BindView(R.id.tv_voltage) TextView voltage;
 
-        View view;
+        private View view;
 
         public ViewHolder(View view) {
             super(view);

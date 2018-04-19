@@ -13,10 +13,11 @@
     <string name="condition_monitoring">状态监控</string>
     <string name="data_monitoring">数据监控</string>
     <string name="abnormal_alarm">异常报警</string>
+    <string name="map_display">地图展示</string>
 
     <string name="equipment_management">设备运维</string>
     <string name="equipment_maintenance">设备维保</string>
-    <string name="equipment_inspection">设备巡检</string>
+    <string name="equipment_inspection">设备点检</string>
     <string name="hidden_management">隐患管理</string>
 
     <string name="comprehensive_report">综合报表</string>
@@ -24,8 +25,9 @@
     <string name="data_analysis">数据分析</string>
 
     <!--数据监控-->
+    <string name="equipment_name">排土机</string>
     <string name="alarm_prompt">报警提示：</string>
-    <string name="equipment_name">设备名称：</string>
+    <string name="test_point_name">测点名称：</string>
     <string name="LED">指示灯：</string>
     <string name="single_motor_value">当前测值</string>
     <string name="temperature">温度：</string>
@@ -33,12 +35,17 @@
     <string name="voltage">电压：</string>
     <string name="normal">正常</string>
     <string name="alarm">报警</string>
+    <string name="please_process">异常，请尽快处理</string>
     <string name="title_activity_login">demo</string>
 
     <!--监控详细-->
     <string name="monitoring_detail">监控详情</string>
     <string name="begin_time">开始时间</string>
-    <string name="alarm_hint">该部件电机温度过高，请尽快处理</string>
+    <string name="no_alarm">无异常</string>
+    <string name="temperature_range">(30-80℃)</string>
+    <string name="voltage_range">(650-750V)</string>
+    <string name="current_range">(300-500A)</string>
+    <string name="alarm_hint">电机 异常，请尽快处理</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">账号</string>

@@ -7,9 +7,9 @@
     android:orientation="vertical"
     tools:context=".ui.equipment_maintenance.EquipmentMaintenanceActivity">
     <include layout="@layout/layout_title_bar"></include>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/equipment_maintenance"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/equipment_maintenance_static"/>
 
 </LinearLayout>

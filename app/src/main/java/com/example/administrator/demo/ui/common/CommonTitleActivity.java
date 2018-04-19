@@ -72,7 +72,6 @@ public abstract class CommonTitleActivity extends AppCompatActivity {
             loadingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         }
         loadingDialog.setMessage(message);
-        loadingDialog.setCancelable(false);
         loadingDialog.show();
     }
 

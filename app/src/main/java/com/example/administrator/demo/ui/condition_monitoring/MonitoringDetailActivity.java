@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.administrator.demo.R;
 import com.example.administrator.demo.model.condition_monitoring.DataMonitoringItem;
@@ -23,7 +24,9 @@ import com.example.administrator.demo.ui.common.CommonTitleActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,21 +50,22 @@ import okhttp3.RequestBody;
 
 public class MonitoringDetailActivity extends CommonTitleActivity {
 
-    private static final String TAG = "MonitorDetailActivity";
+    private static final String TAG = "MonitoringDetail";
     public static final MediaType JSON = MediaType.parse("application/json");
-    private static final int UPDATE_VALUE = 0;
-    private static final int UPDATE_CHART = 1;
+    private final int UPDATE_VALUE = 0;
+    private final int UPDATE_CHART = 1;
+    private final int REFRASH_FREQUENCE = 5000 ; //刷新数据的时间间隔
 
     private int guid;
     private int mid;
     private volatile boolean endRequest;
     private volatile String spinnerItem;
+    private String abnormalText;
     private Thread chartThread;
 
     private List<Line> lines;   //线集，若需要显示多条线则添加多个Line
     private List<PointValue> pointValues;   //图像点集
     private List<AxisValue> axisXValues;   //图像x轴值集
-    private AxisValueFormatter formatter;
 
     @BindView(R.id.chart) LineChartView chartView;
     @BindView(R.id.point_spinner) Spinner spinner;
@@ -69,6 +73,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
     @BindView(R.id.tv_single_temperature) TextView tv_single_temperature;
     @BindView(R.id.tv_single_current) TextView tv_single_current;
     @BindView(R.id.tv_single_voltage) TextView tv_single_voltage;
+    @BindView(R.id.tv_alarm_tint) TextView tv_alarm_tint;
 
     private Unbinder unbinder;
 
@@ -79,6 +84,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
             switch (msg.what) {
                 case UPDATE_VALUE:
                     updateValue((DataMonitoringItem) msg.obj);
+                    updatePrompt();
                     break;
                 case UPDATE_CHART:
                     updateChart((ChartPoint[]) msg.obj);
@@ -107,6 +113,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
     protected void onDestroy() {
         super.onDestroy();
         endRequest = true;
+        unbinder.unbind();
     }
 
     private void initMotorId() {
@@ -172,7 +179,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                                 handler.sendMessage(message);
                             }
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(REFRASH_FREQUENCE);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -202,12 +209,26 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                     String current = data.getString("current");
                     String voltage = data.getString("voltage");
                     Boolean status = false;
+                    StringBuilder builder = new StringBuilder();
                     JSONArray statuses = data.getJSONArray("status");
-                    for (int j = 0; j < statuses.length(); j++) {
-                        if (statuses.getInt(j) == 1) {
-                            status = true;
-                        }
+                    if (statuses.getInt(0) == 1) {
+                        status = true;
+                        builder.append("温度、");
                     }
+                    if (statuses.getInt(1) == 1) {
+                        status = true;
+                        builder.append("电流、");
+                    }
+                    if (statuses.getInt(2) == 1) {
+                        status = true;
+                        builder.append("电压、");
+                    }
+                    if (builder.length() != 0) {
+                        abnormalText = builder.substring(0, builder.length() - 1);
+                    } else {
+                        abnormalText = "";
+                    }
+
                     return new DataMonitoringItem(
                             mid_, motorName, status, temperature, voltage, current);
                 }
@@ -237,7 +258,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                     try {
                         Date date = new Date();
                         String end = format.format(date);
-                        date.setTime(date.getTime() - 60000);
+                        date.setTime(date.getTime() - 1000 * 60 * 15);  //15分钟
                         String start = format.format(date);
 
                         String content = "{\"guid\":" + guid
@@ -245,9 +266,8 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                                 + ",\"category\":\"" + spinnerItem + "\""
                                 + ",\"start\":\"" + start + "\""
                                 + ",\"end\":\"" + end + "\""
-                                +"}";
-                        RequestBody requestBody =
-                                RequestBody.create(JSON, content);
+                                + "}";
+                        RequestBody requestBody = RequestBody.create(JSON, content);
                         okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
                         okhttp3.Request request = new okhttp3.Request.Builder()
                                 .url("http://47.104.29.62:8080/DeviceDataServer/dataDisplay/getRangeData")
@@ -255,7 +275,6 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                                 .build();
                         okhttp3.Response response = client.newCall(request).execute();
                         String responseData = response.body().string();
-                        Log.d(TAG, responseData);
 
                         if (!endRequest) {
                             ChartPoint[] points = parseChart(responseData);
@@ -264,12 +283,12 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                             message.obj = points;
                             handler.sendMessage(message);
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(REFRASH_FREQUENCE);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -290,6 +309,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                 String dataString = jsonObject.getString("data");
                 JSONArray data = new JSONArray(dataString);
                 int length = data.length();
+                Log.d(TAG, "data.length = " + length);
                 ChartPoint[] points = new ChartPoint[length];
                 for (int i = 0; i < length; i++) {
                     JSONObject item = data.getJSONObject(i);
@@ -298,7 +318,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
                     point.value = item.getInt("value");
                     points[points.length - 1 - i] = point;
                 }
-                return points;
+                return filterTime(points);
             } else {
                 int errorCode = jsonObject.getInt("errorCode");
                 String errorString = jsonObject.getString("errorString");
@@ -312,6 +332,39 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
         return null;
     }
 
+    private ChartPoint[] filterTime(ChartPoint[] points) {
+        if (points.length <= 5 * 20) {
+            return points;
+        }
+        ArrayList<ChartPoint> list = new ArrayList<>(20);
+        list.add(points[0]);
+        //取分钟数
+        int index = points[0].time.indexOf(":");
+        String currentMinute = points[0].time.substring(index + 1, index + 3);
+        if (currentMinute.charAt(0) == '0') {
+            currentMinute = currentMinute.substring(1, 2);
+        }
+        Log.d(TAG, "time: " + points[0].time);
+        Log.d(TAG, "currentMinute: " + currentMinute);
+        int nextMinute = Integer.valueOf(currentMinute) + 1;
+        nextMinute = nextMinute >= 60 ? nextMinute - 60 : nextMinute;
+        for (int i = 1; i < points.length; i++) {
+            currentMinute = points[i].time.substring(index + 1, index + 3);
+            String next = String.valueOf(nextMinute);
+            if (nextMinute < 10) {
+                next = "0" + next;
+            }
+            if (next.equals(currentMinute)) {
+                Log.d(TAG, points[i].toString());
+                list.add(points[i]);
+                nextMinute++;
+                nextMinute = nextMinute >= 60 ? nextMinute - 60 : nextMinute;
+            }
+        }
+
+        return list.toArray(new ChartPoint[list.size()]);
+    }
+
     private String formatTime(String time) {
         StringBuilder builder = new StringBuilder();
         char[] timeArr = time.toCharArray();
@@ -319,7 +372,12 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
             switch (c) {
                 case '年':
                 case '月':
+                    builder.append('.');
+                    break;
                 case '日':
+                    break;
+                case ' ':
+                    builder.append('/');
                     break;
                 default:
                     builder.append((c));
@@ -346,10 +404,31 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
         tv_single_voltage.setText(item.getVoltage());
     }
 
+    private void updatePrompt() {
+        if (abnormalText.isEmpty()) {
+            tv_alarm_tint.setText("无异常");
+            tv_alarm_tint.setTextColor(Color.GRAY);
+        } else {
+            String alarmHint = getResources().getString(R.string.alarm_hint);
+            int index = alarmHint.indexOf(" ");
+            String promptText = alarmHint.substring(0, index);  //替换空格部分为异常项
+            promptText += abnormalText;
+            promptText += alarmHint.substring(index + 1, alarmHint.length());
+            tv_alarm_tint.setText(promptText);
+            tv_alarm_tint.setTextColor(Color.RED);
+        }
+    }
+
     private void updateChart(ChartPoint[] points) {
         if (points == null) {
             return;
         }
+
+        Log.d(TAG, "updateChart:[" + points.length + "]");
+        for (int i = 0; i < points.length; i++) {
+            Log.d(TAG, "points[ " + i + "]:" + points[i].toString());
+        }
+
         lines.clear();
         pointValues.clear();
         axisXValues.clear();
@@ -362,7 +441,7 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
             int value = points[i].value;
             maxValue = value > maxValue ? value : maxValue;
             minValue = value < minValue ? value : minValue;
-            pointValues.add(new PointValue(i * 2, value));
+            pointValues.add(new PointValue(i * 1.5f, value));
         }
         //设置线
         Line line = new Line(pointValues);
@@ -377,16 +456,18 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
 
         //设置x轴的标签
         for (int i = 0; i < points.length; i++) {
-            axisXValues.add(new AxisValue(i).setLabel(points[i].time));
+            int index = points[i].time.indexOf("/");
+            String label = points[i].time
+                    .substring(index + 1, points[i].time.length());
+            axisXValues.add(new AxisValue(i * 1.5f).setLabel(label));
         }
         //设置x轴
         Axis x = new Axis();
         x.setValues(axisXValues)
-                .setHasTiltedLabels(true)
-                .setTextSize(10)
+                .setTextSize(12)
+                .setTextColor(Color.BLACK)
                 .setHasLines(true)
                 .setLineColor(Color.LTGRAY)
-                .setTextColor(Color.BLACK)
                 .setName("采集时间");
         data.setAxisXBottom(x);
 
@@ -399,9 +480,11 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
 
         chartView.setLineChartData(data);
 
-        Viewport maxViewPort = new Viewport(0, maxValue + 3.0f, points.length, minValue - 3.0f);
+        Viewport maxViewPort = new Viewport(
+                0f, maxValue + 1.0f, (points.length) * 1.5f, minValue - 1.0f);
         chartView.setMaximumViewport(maxViewPort);
-        Viewport currentViewPort = new Viewport(0, maxValue * 3.0f, 6, minValue - 3.0f);
+        Viewport currentViewPort = new Viewport(
+                0f, maxValue + 1.0f, 9.0f, minValue - 1.0f);
         chartView.setCurrentViewport(currentViewPort);
     }
 
@@ -415,5 +498,13 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
     static class ChartPoint {
         String time;
         int value;
+
+        @Override
+        public String toString() {
+            return "ChartPoint{" +
+                    "time='" + time + '\'' +
+                    ", value=" + value +
+                    '}';
+        }
     }
 }

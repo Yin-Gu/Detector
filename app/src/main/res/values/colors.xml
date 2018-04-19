@@ -11,10 +11,13 @@
     <color name="marginLine">#DADADA</color>
     <color name="darGray">#888888</color>
 
+    <color name="red">#FF0000</color>
+    <color name="green">#00FF00</color>
     <color name="darkRed">#BA2221</color>
     <color name="darkYellow">#D2881D</color>
     <color name="darkGreen">#119211</color>
     <color name="pink">#F45E5F</color>
+    <color name="seashell">#FFF5EE</color>
 
     <color name="transparent">#00000000</color>
     <color name="topbar_3">#339EFE</color>

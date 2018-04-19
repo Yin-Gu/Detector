@@ -21,6 +21,7 @@ import com.example.administrator.demo.ui.equipment_maintenance.EquipmentMaintena
 import com.example.administrator.demo.ui.equipment_maintenance.HiddenManagementActivity;
 import com.example.administrator.demo.ui.homepage.adpater.HomepageAdapter;
 import com.example.administrator.demo.ui.login.LoginActivity;
+import com.example.administrator.demo.ui.map.DeviceMapActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
                     case 0: intent = new Intent(MainActivity.this, DataMonitoringActivity.class);
                     break;
                     case 1: intent = new Intent(MainActivity.this, AbnormalAlarmActivity.class);
+                    break;
+                    case 2: intent = new Intent(MainActivity.this, DeviceMapActivity.class);
                     break;
                     default: break;
                 }
@@ -127,8 +130,10 @@ public class MainActivity extends AppCompatActivity {
     public void initConditionMonitoring(){
         HomepageItem first = new HomepageItem(getString(R.string.data_monitoring),R.drawable.data_monitoring);
         HomepageItem second = new HomepageItem(getString(R.string.abnormal_alarm),R.drawable.abnormal_alarm);
+        HomepageItem third = new HomepageItem(getString(R.string.map_display), R.drawable.device_map);
         conditionMonitoringList.add(first);
         conditionMonitoringList.add(second);
+        conditionMonitoringList.add(third);
     }
     public void initEquipmentMaintenance(){
         HomepageItem first = new HomepageItem(getString(R.string.equipment_maintenance),R.drawable.equipment_maintenance);

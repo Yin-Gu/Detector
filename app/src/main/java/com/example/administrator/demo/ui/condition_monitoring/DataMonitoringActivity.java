@@ -1,5 +1,6 @@
 package com.example.administrator.demo.ui.condition_monitoring;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -9,6 +10,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.administrator.demo.R;
 import com.example.administrator.demo.model.condition_monitoring.DataMonitoringItem;
@@ -19,6 +22,7 @@ import com.example.administrator.demo.ui.condition_monitoring.adapter.DataMonito
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +36,20 @@ import okhttp3.RequestBody;
 public class DataMonitoringActivity extends CommonTitleActivity {
 
     private final static String TAG = "DataMonitoringActivity";
-
     public static final MediaType JSON = MediaType.parse("application/json");
+
     private List<DataMonitoringItem> dataMonitoringItemList = new ArrayList<>();
     private DataMonitoringAdapter dataMonitoringAdapter;
 
+    private Unbinder unbinder;
     private volatile boolean endRequest;
+    private String abnormalMotors;
 
+    @BindView(R.id.rv_data_monitoring) RecyclerView dataMonitoring;
+    @BindView(R.id.tv_abnormal_motors) TextView tv_abnormal_motors;
+    @BindView(R.id.tv_alarm_prompt) TextView tv_alarm_prompt;
+
+    @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -47,6 +58,7 @@ public class DataMonitoringActivity extends CommonTitleActivity {
                 case 1:
                     dismissLoadingDialog();
                     dataMonitoringAdapter.notifyDataSetChanged();
+                    updatePrompt();
                     break;
                 default:
                     break;
@@ -54,26 +66,49 @@ public class DataMonitoringActivity extends CommonTitleActivity {
         }
     };
 
-    private Unbinder unbinder;
-
-    @BindView(R.id.rv_data_monitoring)
-    RecyclerView dataMonitoring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_monitoring);
+        Log.d(TAG, "onCreate()");
         unbinder = ButterKnife.bind(this);
-        endRequest = false;
 
         createDataMonitoring();
         showLoadingDialog("查询中");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+        endRequest = false;
         sendRequest();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        endRequest = true;
+        Log.d(TAG, "onPause()");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop()");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy()");
         endRequest = true;
     }
 
@@ -95,19 +130,6 @@ public class DataMonitoringActivity extends CommonTitleActivity {
             }
         });
     }
-
-//    public void initDataMonitoring() {
-//        DataMonitoringItem first = new DataMonitoringItem("1号电机", true, "73℃", "724V", "548A");
-//        DataMonitoringItem second = new DataMonitoringItem("2号电机", true, "80℃", "722V", "522A");
-//        DataMonitoringItem third = new DataMonitoringItem("3号电机", true, "80℃", "722V", "522A");
-//
-//        dataMonitoringItemList.add(first);
-//        dataMonitoringItemList.add(second);
-//        dataMonitoringItemList.add(third);
-//
-//        Message message = new Message();
-//        handler.sendMessage(message);
-//    }
 
     @Override
     public void beforeFinish() {
@@ -169,6 +191,7 @@ public class DataMonitoringActivity extends CommonTitleActivity {
                 if (equipmentName.equals("推土机") && guid == 0) {
                     JSONArray motors = data.getJSONArray("motor");
                     dataMonitoringItemList.clear();
+                    StringBuilder builder = new StringBuilder();
                     for (int i = 0; i < motors.length(); i++) {
                         JSONObject motor = motors.getJSONObject(i);
                         Integer mid = motor.getInt("mid");
@@ -183,6 +206,16 @@ public class DataMonitoringActivity extends CommonTitleActivity {
                             if (statuses.getInt(j) == 1) {
                                 status = true;
                             }
+                        }
+                        if (status) {
+                            //设置异常提示文本
+                            builder.append(mid + "、");
+                        }
+                        if (builder.length() != 0) {
+                            abnormalMotors = builder.substring(0, builder.length() - 1);
+                            abnormalMotors += "号电机";
+                        } else {
+                            abnormalMotors = "";
                         }
                         DataMonitoringItem item = new DataMonitoringItem(
                                 mid, motorName, status, temperature, voltage, current);
@@ -201,38 +234,14 @@ public class DataMonitoringActivity extends CommonTitleActivity {
         }
     }
 
-//        private void parseJSON(String jsonData) {
-//            try{
-//                JSONObject jsonObject = new JSONObject(removeBOM(jsonData));
-//                JSONObject data = jsonObject.getJSONObject("data");
-//                JSONArray itemList = data.getJSONArray("motor");
-//                for(int i=0;i<itemList.length();i++){
-//                    DataMonitoringItem item = new DataMonitoringItem();
-//                    item.setEquipmentName(itemList.getJSONObject(i).getString("motorName"));
-//                    item.setStatus(true);
-//                    item.setTemperature(itemList.getJSONObject(i).getString("temperature"));
-//                    item.setElectricCurrent(itemList.getJSONObject(i).getString("current"));
-//                    item.setVoltage(itemList.getJSONObject(i).getString("voltage"));
-//                    dataMonitoringItemList.add(item);
-//                }
-//                dataMonitoringAdapter.setDatas(dataMonitoringItemList);
-//
-//            }catch (JSONException e){
-//                e.printStackTrace();
-//            }
-//
-//        }
-//
-//    public static final String removeBOM(String data) {
-//        if (TextUtils.isEmpty(data)) {
-//            return data;
-//        }
-//        if (data.startsWith("\ufeff")) {
-//            return data.substring(1);
-//        } else {
-//            return data;
-//        }
-//    }
-
+    private void updatePrompt() {
+        if (abnormalMotors.isEmpty()) {
+            tv_abnormal_motors.setText("无异常");
+        } else {
+            String promptText = abnormalMotors
+                    + getString(R.string.please_process);
+            tv_abnormal_motors.setText(promptText);
+        }
+    }
 
 }
