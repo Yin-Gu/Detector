@@ -32,23 +32,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
         <activity android:name=".ui.homepage.MainActivity" />
-        <activity android:name=".ui.map.DeviceMapActivity" />
+        <activity android:name=".ui.condition_monitoring.DeviceMapActivity" />
         <activity android:name=".ui.condition_monitoring.DataMonitoringActivity" />
+        <activity android:name=".ui.condition_monitoring.MonitoringDetailActivity" />
         <activity android:name=".ui.condition_monitoring.AbnormalAlarmActivity" />
         <activity android:name=".ui.equipment_maintenance.EquipmentMaintenanceActivity" />
         <activity android:name=".ui.equipment_maintenance.EquipmentInspectionActivity" />
         <activity android:name=".ui.equipment_maintenance.HiddenManagementActivity" />
         <activity android:name=".ui.comprehensive_report.EventStatisticsActivity" />
         <activity android:name=".ui.comprehensive_report.DataAnalysisActivity" />
-        <activity android:name=".ui.login.LoginActivity"
-            android:label="@string/title_activity_login">
+        <activity android:name=".ui.login.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.condition_monitoring.MonitoringDetailActivity" />
     </application>
 
 </manifest>

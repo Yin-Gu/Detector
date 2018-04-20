@@ -1,4 +1,4 @@
-package com.example.administrator.demo.ui.map;
+package com.example.administrator.demo.ui.condition_monitoring;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +13,6 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.example.administrator.demo.R;
-import com.example.administrator.demo.ui.condition_monitoring.DataMonitoringActivity;
 
 import java.util.ArrayList;
 public class DeviceMapActivity extends AppCompatActivity {

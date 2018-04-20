@@ -50,7 +50,7 @@ public abstract class CommonTitleActivity extends AppCompatActivity {
     }
 
     protected void startActivityWithBack(Class<?> cls){
-        Intent intent =new Intent(this,cls);
+        Intent intent = new Intent(this,cls);
         intent.putExtra(BACK_TITLE_NAME_TAG,getString(R.string.msg_back));
         startActivity(intent);
     }
@@ -65,7 +65,7 @@ public abstract class CommonTitleActivity extends AppCompatActivity {
         Toast.makeText(this,message, Toast.LENGTH_SHORT).show();
     }
 
-    ProgressDialog loadingDialog=null;
+    ProgressDialog loadingDialog = null;
     public void showLoadingDialog(String message){
         if(loadingDialog==null) {
             loadingDialog = new ProgressDialog(this);

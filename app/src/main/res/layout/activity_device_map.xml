@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.administrator.demo.ui.map.DeviceMapActivity">
+    tools:context="com.example.administrator.demo.ui.condition_monitoring.DeviceMapActivity">
 
     <com.amap.api.maps.MapView
         android:id="@+id/map"

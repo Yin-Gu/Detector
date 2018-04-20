@@ -1,14 +1,15 @@
 <resources>
-    <string name="app_name">工控监控云平台</string>
+    <string name="app_name">Detector</string>
 
     <!--Common Message-->
     <string name="msg_back">返回</string>
     <string name="msg_confirm">确认</string>
     <string name="msg_cancel">取消</string>
     <string name="msg_hint">提示</string>
+    <string name="no_alarm">无异常</string>
 
     <!--主页面-->
-    <string name="homepage_title">工控监控云平台</string>
+    <string name="homepage_title">远程设备检测医生</string>
 
     <string name="condition_monitoring">状态监控</string>
     <string name="data_monitoring">数据监控</string>
@@ -36,15 +37,13 @@
     <string name="normal">正常</string>
     <string name="alarm">报警</string>
     <string name="please_process">异常，请尽快处理</string>
-    <string name="title_activity_login">demo</string>
 
     <!--监控详细-->
     <string name="monitoring_detail">监控详情</string>
     <string name="begin_time">开始时间</string>
-    <string name="no_alarm">无异常</string>
-    <string name="temperature_range">(30-80℃)</string>
-    <string name="voltage_range">(650-750V)</string>
-    <string name="current_range">(300-500A)</string>
+    <string name="temperature_range">(30–80℃)</string>
+    <string name="voltage_range">(650–750V)</string>
+    <string name="current_range">(300–500A)</string>
     <string name="alarm_hint">电机 异常，请尽快处理</string>
 
     <!-- Strings related to login -->

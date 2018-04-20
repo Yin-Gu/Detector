@@ -3,11 +3,9 @@ package com.example.administrator.demo.ui.homepage;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
-import android.widget.LinearLayout;
 
 import com.example.administrator.demo.R;
 import com.example.administrator.demo.model.hompage.HomepageItem;
@@ -20,8 +18,7 @@ import com.example.administrator.demo.ui.equipment_maintenance.EquipmentInspecti
 import com.example.administrator.demo.ui.equipment_maintenance.EquipmentMaintenanceActivity;
 import com.example.administrator.demo.ui.equipment_maintenance.HiddenManagementActivity;
 import com.example.administrator.demo.ui.homepage.adpater.HomepageAdapter;
-import com.example.administrator.demo.ui.login.LoginActivity;
-import com.example.administrator.demo.ui.map.DeviceMapActivity;
+import com.example.administrator.demo.ui.condition_monitoring.DeviceMapActivity;
 
 import java.util.ArrayList;
 import java.util.List;
