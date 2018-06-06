@@ -1,77 +1,70 @@
 package com.example.administrator.demo.model.condition_monitoring;
 
+import java.util.Arrays;
+
 public class DataMonitoringItem {
     private Integer motorId;
-    private String equipmentName;
+    private String motorName;
     private Boolean status;
-    private String temperature;
-    private String voltage;
-    private String electricCurrent;
+    private String[] attrs;
+    private String[] values;
 
-    public DataMonitoringItem(Integer motorId, String equipmentName, Boolean status, String temperature, String voltage, String electricCurrent) {
+    public DataMonitoringItem(Integer motorId, String motorName, Boolean status, String[] attrs, String[] values) {
         this.motorId = motorId;
-        this.equipmentName = equipmentName;
+        this.motorName = motorName;
         this.status = status;
-        this.temperature = temperature;
-        this.voltage = voltage;
-        this.electricCurrent = electricCurrent;
+        this.attrs = attrs;
+        this.values = values;
     }
 
-    public Integer getMotorId() {return motorId; }
-
-    public String getEquipmentName() {
-        return equipmentName;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public String getTemperature() {
-        return temperature;
-    }
-
-    public String getVoltage() {
-        return voltage;
-    }
-
-    public String getElectricCurrent() {
-        return electricCurrent;
+    public Integer getMotorId() {
+        return motorId;
     }
 
     public void setMotorId(Integer motorId) {
         this.motorId = motorId;
     }
 
-    public void setEquipmentName(String equipmentName) {
-        this.equipmentName = equipmentName;
+    public String getMotorName() {
+        return motorName;
+    }
+
+    public void setMotorName(String motorName) {
+        this.motorName = motorName;
+    }
+
+    public Boolean getStatus() {
+        return status;
     }
 
     public void setStatus(Boolean status) {
         this.status = status;
     }
 
-    public void setTemperature(String temperature) {
-        this.temperature = temperature;
+    public String[] getAttrs() {
+        return attrs;
     }
 
-    public void setVoltage(String voltage) {
-        this.voltage = voltage;
+    public void setAttrs(String[] attrs) {
+        this.attrs = attrs;
     }
 
-    public void setElectricCurrent(String electricCurrent) {
-        this.electricCurrent = electricCurrent;
+    public String[] getValues() {
+        return values;
+    }
+
+    public void setValues(String[] values) {
+        this.values = values;
     }
 
     @Override
     public String toString() {
         return "DataMonitoringItem{" +
                 "motorId=" + motorId +
-                ", equipmentName='" + equipmentName + '\'' +
+                ", motorName='" + motorName + '\'' +
                 ", status=" + status +
-                ", temperature='" + temperature + '\'' +
-                ", voltage='" + voltage + '\'' +
-                ", electricCurrent='" + electricCurrent + '\'' +
+                ", attrs=" + Arrays.toString(attrs) +
+                ", values=" + Arrays.toString(values) +
                 '}';
     }
 }

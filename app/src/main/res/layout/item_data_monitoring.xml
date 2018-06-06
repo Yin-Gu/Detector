@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="85dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_margin="5dp"
-    android:layout_marginBottom="10dp" >
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp" >
+
     <TextView
-        android:id="@+id/tv_equipment_name_hint"
+        android:id="@+id/tv_motor_name_key"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:textSize="13sp"
-        android:text="@string/test_point_name"/>
+        android:textColor="@color/black"
+        android:typeface="serif"
+        android:text="@string/point_name"/>
     <TextView
-        android:id="@+id/tv_equipment_name"
-        android:layout_toRightOf="@id/tv_equipment_name_hint"
+        android:id="@+id/tv_motor_name_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="13sp"/>
+        android:layout_toRightOf="@id/tv_motor_name_key"
+        android:layout_toEndOf="@id/tv_motor_name_key"
+        android:textSize="13sp"  />
 
     <TextView
         android:id="@+id/tv_LED_hint"
@@ -26,72 +29,94 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@id/iv_LED"
+        android:layout_toStartOf="@id/iv_LED"
         android:textSize="13sp"
         android:text="@string/LED"/>
     <ImageView
         android:id="@+id/iv_LED"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_lump"
+        android:src="@drawable/ic_lump"
         android:tint="@color/darkGreen"/>
 
-    <TextView
-        android:id="@+id/tv_temperature_hint"
+    <LinearLayout
+        android:id="@+id/ll_container_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_marginTop="15dp"
-        android:layout_below="@id/tv_equipment_name_hint"
-        android:textSize="13sp"
-        android:text="@string/temperature"/>
-    <TextView
-        android:id="@+id/tv_temperature"
+        android:layout_below="@id/tv_motor_name_key" >
+
+        <TextView
+            android:id="@+id/tv_item_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tv_item_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="13sp"/>
+
+        <TextView
+            android:id="@+id/tv_item_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/tv_motor_name_key"
+        android:layout_toRightOf="@id/ll_container_left"
+        android:layout_toEndOf="@id/ll_container_left"
         android:layout_marginTop="15dp"
-        android:layout_below="@id/tv_equipment_name_hint"
-        android:layout_toEndOf="@id/tv_temperature_hint"
-        android:layout_toRightOf="@id/tv_temperature_hint"
-        android:textSize="13sp"/>
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp" >
+
+        <TextView
+            android:id="@+id/tv_item_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tv_item_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tv_item_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="13sp" />
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/tv_current_hint"
+        android:id="@+id/tv_item_7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/tv_temperature_hint"
-        android:textSize="13sp"
-        android:text="@string/current"/>
+        android:layout_below="@id/ll_container_left"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp" />
     <TextView
-        android:id="@+id/tv_current"
+        android:id="@+id/tv_item_8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/tv_temperature"
-        android:layout_toEndOf="@id/tv_current_hint"
-        android:layout_toRightOf="@id/tv_current_hint"
-        android:textSize="13sp"/>
+        android:layout_below="@id/tv_item_7"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp" />
 
-    <TextView
-        android:id="@+id/tv_voltage_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginLeft="100dp"
-        android:layout_toEndOf="@id/tv_temperature"
-        android:layout_toRightOf="@id/tv_temperature"
-        android:layout_below="@id/tv_LED_hint"
-        android:textSize="13sp"
-        android:text="@string/voltage"/>
-    <TextView
-        android:id="@+id/tv_voltage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_toEndOf="@id/tv_voltage_hint"
-        android:layout_toRightOf="@id/tv_voltage_hint"
-        android:layout_below="@id/tv_LED_hint"
-        android:textSize="13sp"/>
 
 </RelativeLayout>

@@ -2,14 +2,11 @@ package com.example.administrator.demo.net;
 
 import android.util.Log;
 
-import com.example.administrator.demo.model.condition_monitoring.DataMonitoringItem;
 import com.example.administrator.demo.model.net.ResponseMessage;
+import com.example.administrator.demo.conf.LoggingConfigure;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 
 /**
  * Created by Administrator on 2018/4/20 0020.
@@ -33,7 +30,9 @@ public class ResponseParser {
             message = new ResponseMessage(status, data, errorCode, errorString);
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d(TAG, "parseResponse()");
+            if (LoggingConfigure.LOGGING) {
+                Log.d(TAG, "parseResponse()");
+            }
         }
 
         return message;

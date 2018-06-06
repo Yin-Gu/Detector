@@ -9,16 +9,28 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.administrator.demo.R;
+import com.example.administrator.demo.conf.ChartConfigure;
+import com.example.administrator.demo.model.condition_monitoring.CurveData;
 import com.example.administrator.demo.model.condition_monitoring.DataMonitoringItem;
 import com.example.administrator.demo.model.net.ResponseMessage;
 import com.example.administrator.demo.net.RequestManager;
 import com.example.administrator.demo.net.RequestSender;
 import com.example.administrator.demo.net.ResponseParser;
+import com.example.administrator.demo.ui.condition_monitoring.formatter.XAxisValueFormatter;
 import com.example.administrator.demo.ui.common.CommonTitleActivity;
+import com.example.administrator.demo.conf.LoggingConfigure;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,48 +38,67 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import lecho.lib.hellocharts.gesture.ContainerScrollType;
-import lecho.lib.hellocharts.gesture.ZoomType;
-import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.Line;
-import lecho.lib.hellocharts.model.LineChartData;
-import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.Viewport;
-import lecho.lib.hellocharts.view.LineChartView;
 
-public class MonitoringDetailActivity extends CommonTitleActivity {
+public class MonitoringDetailActivity extends CommonTitleActivity implements View.OnLongClickListener{
 
     private static final String TAG = "MonitoringDetail";
     private static final int UPDATE_VALUE = 0;
     private static final int UPDATE_CHART = 1;
+    private static final int GET_MOTOR_BOUND = 2;
+    private static final int NO_NEWEST_DATA = 3;
 
     private int guid;
     private int mid;
-    private volatile boolean endRequest;
+    private String motorName;
+    private String[] attrs;
+    private String[] downs;
+    private String[] ups;
+    private String[] units;
+    private boolean[] status;
+    private TextView[] testPoints;
+    private TextView[] warns;
+
     private volatile String spinnerItem;
-    private String abnormalText;
     private Thread chartThread;
-    private String[] spinnerList;
+    private List<String> spinnerList;
 
-    private List<Line> lines;   //线集，若需要显示多条线则添加多个Line
-    private List<PointValue> pointValues;   //图像点集
-    private List<AxisValue> axisXValues;   //图像x轴值集
+    private volatile boolean endRequest;
+    private volatile boolean hasRange;
+    private volatile int counter;
 
-    @BindView(R.id.chart) LineChartView chartView;
+    private List<Entry> entries;    //点集
+    private List<String> labels;    //X轴标签
+    private List<Integer> colors;    //数据的颜色
+
+
+    @BindView(R.id.line_chart) LineChart lineChart;
     @BindView(R.id.point_spinner) Spinner spinner;
-    @BindView(R.id.tv_motor_name) TextView tv_motor_name;
-    @BindView(R.id.tv_single_temperature) TextView tv_single_temperature;
-    @BindView(R.id.tv_single_current) TextView tv_single_current;
-    @BindView(R.id.tv_single_voltage) TextView tv_single_voltage;
-    @BindView(R.id.tv_alarm_tint) TextView tv_alarm_tint;
+    @BindView(R.id.tv_motor_name_detail) TextView tv_motor_name_detail;
+    @BindView(R.id.tv_item_1_detail) TextView tv_item_1_detail;
+    @BindView(R.id.tv_item_2_detail) TextView tv_item_2_detail;
+    @BindView(R.id.tv_item_3_detail) TextView tv_item_3_detail;
+    @BindView(R.id.tv_item_4_detail) TextView tv_item_4_detail;
+    @BindView(R.id.tv_item_5_detail) TextView tv_item_5_detail;
+    @BindView(R.id.tv_item_6_detail) TextView tv_item_6_detail;
+    @BindView(R.id.tv_item_7_detail) TextView tv_item_7_detail;
+    @BindView(R.id.tv_item_8_detail) TextView tv_item_8_detail;
+    @BindView(R.id.tv_item_1_warn) TextView tv_item_1_warn;
+    @BindView(R.id.tv_item_2_warn) TextView tv_item_2_warn;
+    @BindView(R.id.tv_item_3_warn) TextView tv_item_3_warn;
+    @BindView(R.id.tv_item_4_warn) TextView tv_item_4_warn;
+    @BindView(R.id.tv_item_5_warn) TextView tv_item_5_warn;
+    @BindView(R.id.tv_item_6_warn) TextView tv_item_6_warn;
+    @BindView(R.id.tv_item_7_warn) TextView tv_item_7_warn;
+    @BindView(R.id.tv_item_8_warn) TextView tv_item_8_warn;
+    @BindView(R.id.tv_warn_text) TextView tv_warn_text;
+    @BindView(R.id.tv_no_data_warn) TextView tv_no_data_warn;
 
     private Unbinder unbinder;
 
@@ -76,35 +107,69 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case GET_MOTOR_BOUND:
+                    setRangeArray((String) msg.obj);
+                    hasRange = true;
+                    break;
                 case UPDATE_VALUE:
                     updateSingleMotor((DataMonitoringItem) msg.obj);
                     updatePrompt();
+                    counter++;
                     break;
                 case UPDATE_CHART:
-                    dismissLoadingDialog();
-                    updateChart((ChartPoint[]) msg.obj);
+                    updateLineChart((CurveData[]) msg.obj);
+                    counter++;
+                    break;
+                case NO_NEWEST_DATA:
+                    updateNoDataPrompt();
                     break;
                 default:
                     break;
             }
+
+            if (counter == 2) {
+                dismissLoadingDialog();
+                Toast.makeText(MonitoringDetailActivity.this,
+                        "可以长按放大图表哟!",
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitoring_detail);
-        unbinder = ButterKnife.bind(this);
-        endRequest = false;
 
-        initMotorId();
-        showLoadingDialog("查询中");
-        requestSingleMotor();
+        unbinder = ButterKnife.bind(this);
+        initUIArray();
         initSpinner();
-        initChartView();
-        requestChart();
+        initLineChart();
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        hasRange = false;
+        endRequest = false;
+        counter = 0;
+        getIntentExtraData();
+        if (RequestSender.checkNetworkAvailable(this)) {
+            showLoadingDialog("查询中");
+            requestCmptRange();
+            requestSingleMotor();
+            requestLineChart();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        endRequest = true;
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -114,28 +179,82 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
     }
 
     @Override
+    public boolean onLongClick(View v) {
+        if (v == lineChart) {
+            float up = Float.MIN_VALUE, down = Float.MIN_VALUE;
+            for (int i = 0; i < attrs.length; i++) {
+                if (attrs[i].equals(spinnerItem)) {
+                    up = Float.valueOf(ups[i]);
+                    if (downs[i] != null && !downs[i].equals("null")) {
+                        down = Float.valueOf(downs[i]);
+                    }
+                }
+            }
+
+            Intent intent = new Intent(this, ChartActivity.class);
+            intent.putExtra("guid", guid);
+            intent.putExtra("mid", mid);
+            intent.putExtra("motorName", motorName);
+            intent.putExtra("spinnerItem", spinnerItem);
+            intent.putExtra("down", down);
+            intent.putExtra("up", up);
+            startActivity(intent);
+        }
+        return true;
+    }
+
+    @Override
     public void beforeFinish(){}
 
     @Override
     public void setTitle(){ titleBar.setText(getText(R.string.monitoring_detail));}
 
-    private void initMotorId() {
+    private void initUIArray() {
+        testPoints = new TextView[]{tv_item_1_detail, tv_item_2_detail,
+                tv_item_3_detail, tv_item_4_detail, tv_item_5_detail,
+                tv_item_6_detail, tv_item_7_detail, tv_item_8_detail};
+        warns = new TextView[] {tv_item_1_warn, tv_item_2_warn,
+                tv_item_3_warn, tv_item_4_warn, tv_item_5_warn,
+                tv_item_6_warn, tv_item_7_warn, tv_item_8_warn};
+    }
+
+    private void getIntentExtraData() {
         Intent intent = getIntent();
         guid = intent.getIntExtra("guid", -1);
         mid = intent.getIntExtra("mid", -1);
-        if (guid == -1 || mid == -1) {
+        motorName = intent.getStringExtra("motorName");
+        if (guid == -1 || mid == -1 || motorName == null) {
             endRequest = true;
         }
     }
 
     private void initSpinner() {
-        spinnerList = getResources().getStringArray(R.array.measuring_point);
-        spinnerItem = spinnerList[0];
+        spinnerList = new ArrayList<>(8);
+        LinkedList<String> temp = new LinkedList<>();
+        String[] attrs = getIntent().getStringArrayExtra("attrs");
+        for (String item: attrs) {
+            if (item.length() < 10) {
+                spinnerList.add(item);
+            } else {
+                temp.add(item);
+            }
+        }
+        spinnerList.addAll(temp);
+
+        if (spinnerList.size() != 0) {
+            spinnerItem = spinnerList.get(0);
+        }
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, spinnerList);
+        spinner.setAdapter(adapter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                spinnerItem = spinnerList[position];
+                if (spinnerList.size() != 0) {
+                    spinnerItem = spinnerList.get(position);
+                }
                 chartThread.interrupt();
             }
 
@@ -145,49 +264,101 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
         });
     }
 
-    private void initChartView() {
-        chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
-        chartView.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
+    private void requestCmptRange() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String url = RequestManager.getCmptRange;
+                String content = "{\"cmptName\":\""  + motorName + "\"}";
+                String response = RequestSender.postRequest(url, content);
+                ResponseMessage message = null;
+                if (response != null) {
+                    message = ResponseParser.parseResponse(response);
+                }
+                if (message != null && message.isSuccess()) {
+                    Message msg = Message.obtain();
+                    msg.obj = message.getData();
+                    msg.what = GET_MOTOR_BOUND;
+                    handler.sendMessage(msg);
+                } else if (message != null) {
+                    if (LoggingConfigure.LOGGING) {
+                        Log.d(TAG, "requestCmptRange() { "
+                                + "errorCode: " + message.getErrorCode()
+                                + "errorString: " + message.getErrorString()
+                                + "}");
+                    }
+                }
+            }
+        }).start();
+    }
 
-        lines = new ArrayList<>();
-        pointValues = new ArrayList<>();
-        axisXValues = new ArrayList<>();
+    private void setRangeArray(String dataJson) {
+        if (dataJson == null || dataJson.isEmpty())
+            return;
+
+        try {
+            JSONObject data = new JSONObject(dataJson);
+            JSONArray attrArray = data.getJSONArray("attrs");
+            JSONArray downArray = data.getJSONArray("down");
+            JSONArray upArray = data.getJSONArray("up");
+            JSONArray unitArray = data.getJSONArray("unit");
+
+            int length = attrArray.length();
+            attrs = new String[length];
+            downs = new String[length];
+            ups = new String[length];
+            units = new String[length];
+            for (int i = 0; i < length; i++) {
+                attrs[i] = attrArray.getString(i);
+                downs[i] = downArray.getString(i);
+                ups[i] = upArray.getString(i);
+                units[i] = unitArray.getString(i);
+            }
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void requestSingleMotor() {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                while (!hasRange) ;
+
+                String url = RequestManager.singleMotorData;
+                String content = "{\"guid\":" + guid
+                        + ",\"mid\":" + mid
+                        + ",\"motorName\":\"" + motorName +"\""
+                        + "}";
                 while (!endRequest) {
-                    String url = RequestManager.singleMotorData;
-                    String content = "{\"guid\":\"" + guid + "\",\"mid\":\"" + mid + "\"}";
                     String response = RequestSender.postRequest(url, content);
                     if (!endRequest) {
                         ResponseMessage message = null;
                         if (response != null) {
                             message = ResponseParser.parseResponse(response);
                         }
-                        if (message != null) {
-                            if (message.isSuccess()) {
-                                DataMonitoringItem item =
-                                        parseSingleMotor(message.getData());
-                                if (item != null) {
-                                    Message msg = new Message();
-                                    msg.what = UPDATE_VALUE;
-                                    msg.obj = item;
-                                    handler.sendMessage(msg);
-                                    try {
-                                        Thread.sleep(RequestManager.REQUEST_FREQUENCE);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            } else {
-                                Log.d(TAG, "requestSingleMotor(){ "
+                        if (message != null && message.isSuccess()) {
+                            DataMonitoringItem item = parseSingleMotor(message.getData());
+                            if (item != null) {
+                                Message msg = Message.obtain();
+                                msg.what = UPDATE_VALUE;
+                                msg.obj = item;
+                                handler.sendMessage(msg);
+                            }
+                        } else if (message != null) {
+                            if (LoggingConfigure.LOGGING) {
+                                Log.d(TAG, "requestSingleMotor() { "
                                         + "errorCode: " + message.getErrorCode()
-                                        + "errorString: " + message.getErrorString());
+                                        + "errorString: " + message.getErrorString()
+                                        + "}");
                             }
                         }
+                    }
+
+                    try {
+                        Thread.sleep(RequestManager.REQUEST_RATE);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -195,93 +366,96 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
     }
 
     private DataMonitoringItem parseSingleMotor(String dataJson) {
-        if (dataJson != null && dataJson.isEmpty()) {
+        if (dataJson == null || dataJson.isEmpty())
             return null;
-        }
+
         try {
             JSONObject data = new JSONObject(dataJson);
             int mid_ = data.getInt("mid");
             if (mid_ == mid) {
                 String motorName = data.getString("motorName");
-                String temperature = data.getString("temperature");
-                String current = data.getString("current");
-                String voltage = data.getString("voltage");
-
-                Boolean status = false;
-                StringBuilder builder = new StringBuilder();
+                JSONArray attrs = data.getJSONArray("attrs");
+                JSONArray values = data.getJSONArray("values");
                 JSONArray statuses = data.getJSONArray("status");
-                if (statuses.getInt(0) == 1) {
-                    status = true;
-                    builder.append("温度、");
-                }
-                if (statuses.getInt(1) == 1) {
-                    status = true;
-                    builder.append("电流、");
-                }
-                if (statuses.getInt(2) == 1) {
-                    status = true;
-                    builder.append("电压、");
-                }
-                if (builder.length() != 0) {
-                    abnormalText = builder.substring(0, builder.length() - 1);
-                } else {
-                    abnormalText = "";
+
+                String[] attrsArray = new String[attrs.length()];
+                String[] valuesArray = new String[values.length()];
+                status = new boolean[statuses.length()];
+
+                for (int i = 0; i < this.attrs.length; i++) {
+                    attrsArray[i] = this.attrs[i];
+
+                    for (int j = 0; j < attrs.length(); j++) {
+                        if (attrs.getString(j).equals(this.attrs[i])) {
+                            status[i] = statuses.getInt(j) == 1;
+                            valuesArray[i] = values.getString(j);
+                            break;
+                        }
+                    }
                 }
 
-                return new DataMonitoringItem(
-                        mid_, motorName, status, temperature, voltage, current);
+                return new DataMonitoringItem(mid_,
+                        motorName, false, attrsArray, valuesArray);
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d(TAG, "parseSingleMotor()");
         }
 
         return null;
     }
 
-    private void requestChart() {
+    private void requestLineChart() {
         chartThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                while (!hasRange) ;
+
                 @SuppressLint("SimpleDateFormat")
                 SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+                String url = RequestManager.getRangeData;
                 while (!endRequest) {
                     Date date = new Date();
                     String end = format.format(date);
-                    date.setTime(date.getTime() - 1000 * 60 * 15);  //15分钟
+                    date.setTime(date.getTime() - 1000 * 60 * ChartConfigure.POINT_MINUTE); //2分钟
                     String start = format.format(date);
 
                     String content = "{\"guid\":" + guid
                             + ",\"mid\":" + mid
+                            + ",\"motorName\":\"" + motorName + "\""
                             + ",\"category\":\"" + spinnerItem + "\""
                             + ",\"start\":\"" + start + "\""
                             + ",\"end\":\"" + end + "\""
                             + "}";
-                    String url = RequestManager.rangeData;
                     String response = RequestSender.postRequest(url, content);
                     if (!endRequest) {
                         ResponseMessage message = null;
                         if (response != null) {
                             message = ResponseParser.parseResponse(response);
                         }
-                        if (message != null) {
-                            if (message.isSuccess()) {
-                                ChartPoint[] points = parseChart(message.getData());
-                                Message msg = new Message();
-                                msg.what = UPDATE_CHART;
-                                msg.obj = points;
-                                handler.sendMessage(msg);
-                                try {
-                                    Thread.sleep(RequestManager.REQUEST_FREQUENCE);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
+                        if (message != null && message.isSuccess()) {
+                            CurveData[] points = parseChart(message.getData());
+                            Message msg = Message.obtain();
+                            msg.what = UPDATE_CHART;
+                            msg.obj = points;
+                            handler.sendMessage(msg);
+                        } else if (message != null) {
+                            Message msg = Message.obtain();
+                            msg.what = NO_NEWEST_DATA;
+                            handler.sendMessage(msg);
+                            if (LoggingConfigure.LOGGING) {
                                 Log.d(TAG, "sendRequest(){ "
                                         + "errorCode: " + message.getErrorCode()
-                                        + "errorString: " + message.getErrorString());
+                                        + "errorString: " + message.getErrorString()
+                                        + "}");
                             }
                         }
+                    }
+
+                    try {
+                        Thread.sleep(RequestManager.REQUEST_RATE);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -289,194 +463,207 @@ public class MonitoringDetailActivity extends CommonTitleActivity {
         chartThread.start();
     }
 
-    private ChartPoint[] parseChart(String dataJson) {
-        if (dataJson != null && dataJson.isEmpty()) {
+    private CurveData[] parseChart(String dataJson) {
+        if (dataJson != null && dataJson.isEmpty())
             return null;
-        }
+
         try {
             JSONArray data = new JSONArray(dataJson);
+
             int length = data.length();
-            Log.d(TAG, "data.length = " + length);
-            ChartPoint[] points = new ChartPoint[length];
+            CurveData[] points = new CurveData[length];
             for (int i = 0; i < length; i++) {
                 JSONObject item = data.getJSONObject(i);
-                ChartPoint point = new ChartPoint();
+                CurveData point = new CurveData();
                 point.time = formatTime(item.getString("time"));
-                point.value = item.getInt("value");
+                point.value = item.getDouble("value");
                 points[i] = point;
             }
 
-            return filterTime(points);
+            return invertArray(points);
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d(TAG, "parseChart()");
         }
 
         return null;
     }
 
-    private ChartPoint[] filterTime(ChartPoint[] points) {
-        if (points.length <= 100) {
-            return points;
-        }
-        ArrayList<ChartPoint> list = new ArrayList<>(20);
-        list.add(points[0]);
-        //取分钟数
-        int minuteIndex = points[0].time.indexOf(":");
-        String currentMinute = points[0].time
-                .substring(minuteIndex + 1, minuteIndex + 3);
-        if (currentMinute.charAt(0) == '0') {
-            currentMinute = currentMinute.substring(1, 2);
-        }
-        int lastMinute = Integer.valueOf(currentMinute) - 1;
-        lastMinute = lastMinute < 0 ? lastMinute + 60 : lastMinute;
-        for (int i = 1; i < points.length; i++) {
-            currentMinute = points[i].time
-                    .substring(minuteIndex + 1, minuteIndex + 3);
-            String last = String.valueOf(lastMinute);
-            if (lastMinute < 10) {
-                last = "0" + last;
-            }
-            if (last.equals(currentMinute)) {
-                Log.d(TAG, points[i].toString());
-                list.add(points[i]);
-                lastMinute--;
-                lastMinute = lastMinute < 0 ? lastMinute + 60 : lastMinute;
-            }
+    private CurveData[] invertArray(CurveData[] points) {
+        //获取到的数据反序，需要调换位置
+        CurveData[] results = new CurveData[points.length];
+        for (int i = 0; i < results.length; i++) {
+            results[results.length - 1 - i] = points[i];
         }
 
-        //获取到的数据反序，需要调换位置
-        ChartPoint[] results = new ChartPoint[list.size()];
-        for (int i = 0; i < results.length; i++) {
-            results[results.length - 1 - i] = list.get(i);
-        }
         return results;
     }
 
     private String formatTime(String time) {
-        StringBuilder builder = new StringBuilder();
-        char[] timeArr = time.toCharArray();
-        for (char c : timeArr) {
-            switch (c) {
-                case '年':
-                case '月':
-                    builder.append('.');
-                    break;
-                case '日':
-                    break;
-                case ' ':
-                    builder.append('/');
-                    break;
-                default:
-                    builder.append((c));
-                    break;
-            }
+        String[] timeArray = time.split(" ");
+        if (timeArray.length != 2) {
+            return "00:00:00";
+        } else {
+            return timeArray[1];
         }
-        return builder.toString();
     }
 
     private void updateSingleMotor(DataMonitoringItem item) {
-        tv_motor_name.setText(item.getEquipmentName());
-        tv_single_temperature.setText(item.getTemperature());
-        tv_single_current.setText(item.getElectricCurrent());
-        tv_single_voltage.setText(item.getVoltage());
-    }
-
-    private void updatePrompt() {
-        if (abnormalText.isEmpty()) {
-            tv_alarm_tint.setText(getString(R.string.no_alarm));
-            tv_alarm_tint.setTextColor(Color.GRAY);
-        } else {
-            String alarmHint = getResources().getString(R.string.alarm_hint);
-            int index = alarmHint.indexOf(" ");
-            //替换空格部分为异常项
-            String promptText = alarmHint.substring(0, index);
-            promptText += abnormalText;
-            promptText += alarmHint.substring(index + 1, alarmHint.length());
-            tv_alarm_tint.setText(promptText);
-            tv_alarm_tint.setTextColor(Color.RED);
-        }
-    }
-
-    private void updateChart(ChartPoint[] points) {
-        if (points == null) {
+        if (item == null) {
+            Toast.makeText(this, "no data!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d(TAG, "updateChart:[" + points.length + "]");
-        for (int i = 0; i < points.length; i++) {
-            Log.d(TAG, "points[ " + i + "]:" + points[i].toString());
+        tv_motor_name_detail.setText(item.getMotorName());
+
+        int shortStart = 0, longStart = 6;
+        int shortEnd = 6, longEnd = 8;
+        String[] attrs = item.getAttrs();
+        String[] values = item.getValues();
+
+        for (int i = 0; i < attrs.length; i++) {
+            String text = attrs[i] + ": " + values[i];
+            if (attrs[i].length() < 10) {
+                testPoints[shortStart].setVisibility(View.VISIBLE);
+                testPoints[shortStart++].setText(text);
+            } else {
+                testPoints[longStart].setVisibility(View.VISIBLE);
+                testPoints[longStart++].setText(text);
+            }
         }
 
-        lines.clear();
-        pointValues.clear();
-        axisXValues.clear();
-        LineChartData data = new LineChartData();
-
-        int maxValue = Integer.MIN_VALUE;
-        int minValue = Integer.MAX_VALUE;
-        //设置点
-        for (int i = 0; i < points.length; i++) {
-            int value = points[i].value;
-            maxValue = value > maxValue ? value : maxValue;
-            minValue = value < minValue ? value : minValue;
-            pointValues.add(new PointValue(i * 1.5f, value));
+        while (shortStart < shortEnd) {
+            testPoints[shortStart++].setVisibility(View.GONE);
         }
-        //设置线
-        Line line = new Line(pointValues);
-        line.setColor(Color.BLUE)
-                .setCubic(false)
-                .setHasLabels(true) //设置点上显示值
-                .setPointColor(Color.BLACK)
-                .setPointRadius(2)  //设置点的大小
-                .setStrokeWidth(2); //设置线的粗细
-        lines.add(line);
-        data.setLines(lines);
-
-        //设置x轴的标签
-        for (int i = 0; i < points.length; i++) {
-            int index = points[i].time.indexOf("/");
-            String label = points[i].time
-                    .substring(index + 1, points[i].time.length());
-            axisXValues.add(new AxisValue(i * 1.5f).setLabel(label));
-        }
-        //设置x轴
-        Axis x = new Axis();
-        x.setValues(axisXValues)
-                .setTextSize(12)
-                .setTextColor(Color.BLACK)
-                .setHasLines(true)
-                .setLineColor(Color.LTGRAY)
-                .setName("采集时间");
-        data.setAxisXBottom(x);
-
-        //设置y轴
-        Axis y = new Axis();
-        y.setTextColor(Color.BLACK)
-                .setHasLines(true)
-                .setLineColor(Color.LTGRAY);
-        data.setAxisYLeft(y);
-
-        chartView.setLineChartData(data);
-
-        Viewport maxViewPort = new Viewport(
-                0f, maxValue + 1.0f, (points.length - 1) * 1.5f + 0.5f, minValue - 1.0f);
-        chartView.setMaximumViewport(maxViewPort);
-        Viewport currentViewPort = new Viewport(
-                0f, maxValue + 1.0f, 9.0f, minValue - 1.0f);
-        chartView.setCurrentViewport(currentViewPort);
-    }
-
-    static class ChartPoint {
-        String time;
-        int value;
-
-        @Override
-        public String toString() {
-            return "ChartPoint{" +
-                    "time='" + time + '\'' +
-                    ", value=" + value +
-                    '}';
+        while (longStart < longEnd) {
+            testPoints[longStart++].setVisibility(View.GONE);
         }
     }
+
+    private void updatePrompt() {
+        int length = attrs.length;
+        int shortStart = 0, longStart = 6;
+        int shortEnd = 6, longEnd = 8;
+        for (int i = 0; i < length; i++) {
+            if (!status[i]) continue;
+            tv_warn_text.setVisibility(View.VISIBLE);
+
+            String text;
+            if (downs[i] == null || downs[i].equals("null")) {
+                text = attrs[i] + "异常 (/"  + " - " + ups[i] + units[i] + ")";
+            } else {
+                text = attrs[i] + "异常 (" + downs[i] + " - " + ups[i] + units[i] + ")";
+            }
+
+            if (attrs[i].length() < 10) {
+                warns[shortStart].setVisibility(View.VISIBLE);
+                warns[shortStart++].setText(text);
+            } else {
+                warns[longStart].setVisibility(View.VISIBLE);
+                warns[longStart++].setText(text);
+            }
+        }
+
+        while (shortStart < shortEnd) {
+            warns[shortStart++].setVisibility(View.GONE);
+        }
+        while (longStart < longEnd) {
+            warns[longStart++].setVisibility(View.GONE);
+        }
+    }
+
+    private void updateNoDataPrompt() {
+        dismissLoadingDialog();
+        String text = "最近" + ChartConfigure.POINT_MINUTE + "分钟无数据!";
+        tv_no_data_warn.setText(text);
+        tv_no_data_warn.setVisibility(View.VISIBLE);
+    }
+
+    private void initLineChart() {
+        entries = new ArrayList<>();
+        labels = new ArrayList<>();
+        colors = new ArrayList<>();
+
+        lineChart.setOnLongClickListener(this);
+        //是否隐藏图表描述
+        lineChart.getDescription().setEnabled(false);
+        //默认Y轴有两个，左右各一个
+        //设置右轴不显示
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.setScaleXEnabled(false);
+
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setDrawGridLines(true);
+        xAxis.setGridColor(Color.LTGRAY);
+        xAxis.setTextColor(Color.BLACK);
+        xAxis.setTextSize(ChartConfigure.AXIS_TEXT_SIZE);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setValueFormatter(new XAxisValueFormatter(labels));
+
+        YAxis yAxis = lineChart.getAxisLeft();
+        yAxis.setDrawGridLines(true);
+        yAxis.setGridColor(Color.LTGRAY);
+        yAxis.setTextColor(Color.BLACK);
+        yAxis.setTextSize(ChartConfigure.AXIS_TEXT_SIZE);
+    }
+
+    private void updateLineChart(CurveData[] points) {
+        tv_no_data_warn.setVisibility(View.GONE);
+
+        if (!LoggingConfigure.LOGGING) {
+            for (CurveData point : points) {
+                Log.d(TAG, point.time + " " + point.value);
+            }
+        }
+
+        entries.clear();
+        labels.clear();
+        colors.clear();
+
+        float up = Float.MIN_VALUE, down = Float.MIN_VALUE;
+        for (int i = 0; i < attrs.length; i++) {
+            if (attrs[i].equals(spinnerItem)) {
+                up = Float.valueOf(ups[i]);
+                if (downs[i] != null && !downs[i].equals("null")) {
+                    down = Float.valueOf(downs[i]);
+                }
+            }
+        }
+
+        for (int i = 0; i < points.length; i++) {
+            float value = (float) points[i].value;
+            entries.add(new Entry(i * ChartConfigure.DATA_GAP, value));
+            labels.add(points[i].time);
+
+            if (Math.abs(down - Float.MIN_VALUE) < 1E-10) {
+                if (value > up) {
+                    colors.add(Color.parseColor("#FF0000"));
+                } else {
+                    colors.add(Color.parseColor("#32CD32"));
+                }
+            } else {
+                if (value < down || value > up) {
+                    colors.add(Color.parseColor("#FF0000"));
+                } else {
+                    colors.add(Color.parseColor("#32CD32"));
+                }
+            }
+        }
+
+        LineDataSet dataSet = new LineDataSet(entries, spinnerItem);
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        LineData lineData = new LineData(dataSet);
+        lineData.setValueTextSize(ChartConfigure.POINT_TEXT_SIZE);
+        lineData.setValueTextColors(colors);
+
+        lineChart.setData(lineData);
+        lineChart.animateX(1000);
+
+        float maxXRange = 10;
+        float maxXValue = points.length * ChartConfigure.DATA_GAP + 1.0f;
+        lineChart.setVisibleXRangeMaximum(maxXRange);
+        lineChart.getXAxis().setAxisMinimum(-0.5f);
+        lineChart.getXAxis().setAxisMaximum(maxXValue);
+    }
+
 }

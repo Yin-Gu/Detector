@@ -19,6 +19,7 @@ import com.example.administrator.demo.ui.equipment_maintenance.EquipmentMaintena
 import com.example.administrator.demo.ui.equipment_maintenance.HiddenManagementActivity;
 import com.example.administrator.demo.ui.homepage.adpater.HomepageAdapter;
 import com.example.administrator.demo.ui.condition_monitoring.DeviceMapActivity;
+import com.example.administrator.demo.ui.setting.SettingActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +32,12 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.condition_monitoring) RecyclerView conditionMonitoring;
     @BindView(R.id.equipment_maintenance) RecyclerView equipmentMaintenance;
     @BindView(R.id.comprehensive_report) RecyclerView comprehensiveReport;
+    @BindView(R.id.setting) RecyclerView setting;
 
     private List<HomepageItem> conditionMonitoringList = new ArrayList<>();
     private List<HomepageItem> equipmentMaintenanceList = new ArrayList<>();
     private List<HomepageItem> comprehensiveReportList = new ArrayList<>();
+    private List<HomepageItem> settingList = new ArrayList<>();
 
     private Unbinder unbinder;
     @Override
@@ -46,10 +49,12 @@ public class MainActivity extends AppCompatActivity {
         createConditionMonitoring();
         createEquipmentMaintenance();
         createComprehensiveReport();
+        createSetting();
 
         initConditionMonitoring();
         initEquipmentMaintenance();
         initComprehensiveReport();
+        initSetting();
     }
 
     public void createConditionMonitoring(){
@@ -120,9 +125,27 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
 
+    public void createSetting() {
+        StaggeredGridLayoutManager layoutSetting = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+        setting.setLayoutManager(layoutSetting);
+        HomepageAdapter settingAdapter = new HomepageAdapter(settingList);
+        setting.setAdapter(settingAdapter);
+
+        settingAdapter.setItemClickListener(new ItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                Intent intent = new Intent();
+                switch (position) {
+                    case 0: intent = new Intent(MainActivity.this, SettingActivity.class);
+                        break;
+                    default: break;
+                }
+                startActivity(intent);
+            }
+        });
+    }
 
     public void initConditionMonitoring(){
         HomepageItem first = new HomepageItem(getString(R.string.data_monitoring),R.drawable.data_monitoring);
@@ -146,6 +169,11 @@ public class MainActivity extends AppCompatActivity {
         comprehensiveReportList.add(first);
         comprehensiveReportList.add(second);
     }
+    public void initSetting() {
+        HomepageItem first = new HomepageItem("边界设置", R.drawable.setting);
+        settingList.add(first);
+    }
+
     @Override
     public void onResume() {
         super.onResume();

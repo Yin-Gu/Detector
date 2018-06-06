@@ -8,252 +8,244 @@
 
     <include layout="@layout/layout_title_bar"></include>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginStart="5dp"
-            android:gravity="center_vertical"
-            android:textSize="13sp"
-            android:text="@string/alarm_prompt"  />
-        <TextView
-            android:id="@+id/tv_alarm_tint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:text="@string/no_alarm"
-            android:textSize="13sp" />
-    </LinearLayout>
+            android:orientation="vertical" >
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="85dp"
-        android:background="@color/white"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" >
 
-        <TextView
-            android:id="@+id/tv_motor_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:textSize="13sp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/tv_motor_name"
-            android:layout_toRightOf="@id/tv_motor_name"
-            android:text="@string/single_motor_value"
-            android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_motor_name_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:textColor="@color/black"
+                    android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/tv_single_temperature_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_motor_name"
-            android:layout_marginTop="15dp"
-            android:textSize="13sp"
-            android:text="@string/temperature"/>
-        <TextView
-            android:id="@+id/tv_single_temperature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:layout_marginTop="15dp"
-            android:layout_below="@id/tv_motor_name"
-            android:layout_toRightOf="@id/tv_single_temperature_hint"
-            android:layout_toEndOf="@id/tv_single_temperature_hint" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:textSize="13sp"
-            android:layout_marginTop="15dp"
-            android:layout_below="@id/tv_motor_name"
-            android:layout_toEndOf="@id/tv_single_temperature"
-            android:layout_toRightOf="@id/tv_single_temperature"
-            android:text="@string/temperature_range"/>
+                <LinearLayout
+                    android:id="@+id/ll_container_left_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_below="@id/tv_motor_name_detail"
+                    android:layout_marginTop="15dp" >
 
-        <TextView
-            android:id="@+id/tv_single_current_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/tv_single_temperature_hint"
-            android:textSize="13sp"
-            android:text="@string/current"/>
-        <TextView
-            android:id="@+id/tv_single_current"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/tv_single_temperature"
-            android:layout_toRightOf="@id/tv_single_current_hint"
-            android:layout_toEndOf="@id/tv_single_current_hint"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:textSize="13sp"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/tv_single_temperature"
-            android:layout_toEndOf="@id/tv_single_current"
-            android:layout_toRightOf="@id/tv_single_current"
-            android:text="@string/current_range"/>
+                    <TextView
+                        android:id="@+id/tv_item_1_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/tv_single_voltage_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginLeft="100dp"
-            android:layout_below="@id/tv_motor_name"
-            android:layout_toEndOf="@id/tv_single_temperature"
-            android:layout_toRightOf="@id/tv_single_temperature"
-            android:textSize="13sp"
-            android:text="@string/voltage"/>
-        <TextView
-            android:id="@+id/tv_single_voltage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:layout_marginTop="15dp"
-            android:layout_below="@id/tv_motor_name"
-            android:layout_toRightOf="@id/tv_single_voltage_hint"
-            android:layout_toEndOf="@id/tv_single_voltage_hint"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:textSize="13sp"
-            android:layout_marginTop="15dp"
-            android:layout_below="@id/tv_motor_name"
-            android:layout_toEndOf="@id/tv_single_voltage"
-            android:layout_toRightOf="@id/tv_single_voltage"
-            android:text="@string/voltage_range"/>
-    </RelativeLayout>
-    
-    <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="80dp"-->
-        <!--android:layout_marginTop="10dp"-->
-        <!--android:background="@color/white"-->
-        <!--android:orientation="vertical">-->
+                    <TextView
+                        android:id="@+id/tv_item_3_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        android:textSize="13sp" />
 
-        <!--<TextView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginBottom="5dp"-->
-            <!--android:text="@string/single_motor_value"-->
-            <!--android:textSize="13sp" />-->
+                    <TextView
+                        android:id="@+id/tv_item_5_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        android:textSize="13sp" />
+                </LinearLayout>
 
-        <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="30dp"-->
-            <!--android:orientation="horizontal">-->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_below="@id/tv_motor_name_detail"
+                    android:layout_toRightOf="@id/ll_container_left_detail"
+                    android:layout_toEndOf="@id/ll_container_left_detail"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginStart="50dp" >
 
-            <!--<TextView-->
-                <!--android:id="@+id/Dtv_device_parameters1"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="电机电流：50A"-->
-                <!--android:textSize="13sp" />-->
+                    <TextView
+                        android:id="@+id/tv_item_2_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:textSize="13sp" />
 
-            <!--<TextView-->
-                <!--android:id="@+id/Dtv_device_parameters2"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginLeft="50dp"-->
-                <!--android:text="减速机温度：24.2°C"-->
-                <!--android:textSize="13sp" />-->
-        <!--</LinearLayout>-->
+                    <TextView
+                        android:id="@+id/tv_item_4_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        android:textSize="13sp" />
 
-        <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="30dp"-->
-            <!--android:orientation="horizontal">-->
+                    <TextView
+                        android:id="@+id/tv_item_6_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        android:textSize="13sp" />
+                </LinearLayout>
 
-            <!--<TextView-->
-                <!--android:id="@+id/Dtv_device_parameters3"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="电机温度：92.3°C"-->
-                <!--android:textSize="13sp" />-->
+                <TextView
+                    android:id="@+id/tv_item_7_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/ll_container_left_detail"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_item_8_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_item_7_detail"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textSize="13sp" />
+            </RelativeLayout>
 
-            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
-                <!--&lt;!&ndash;android:id="@+id/Dtv_device_parameters4"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_marginLeft="50dp"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:text="皮带运行速度30.02"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:textSize="13sp" />&ndash;&gt;-->
-        <!--</LinearLayout>-->
-    <!--</LinearLayout>-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/white"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" >
 
-    <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginBottom="10dp"-->
-        <!--android:layout_marginTop="10dp"-->
-        <!--android:orientation="horizontal">-->
+                <TextView
+                    android:id="@+id/tv_warn_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:textColor="@color/darkRed"
+                    android:text="@string/alarm_hint"
+                    android:textSize="13sp" />
 
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="开始时间："-->
-            <!--android:textSize="13sp" />-->
+                <TextView
+                    android:id="@+id/tv_item_1_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_item_2_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
 
-        <!--<EditText-->
-            <!--android:layout_width="80dp"-->
-            <!--android:layout_height="wrap_content" />-->
+                <TextView
+                    android:id="@+id/tv_item_3_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_item_4_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
 
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="结束时间："-->
-            <!--android:textSize="13sp" />-->
+                <TextView
+                    android:id="@+id/tv_item_5_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_item_6_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
 
-        <!--<EditText-->
-            <!--android:layout_width="80dp"-->
-            <!--android:layout_height="wrap_content" />-->
+                <TextView
+                    android:id="@+id/tv_item_7_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_item_8_warn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:textColor="@color/red"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
-    <!--</LinearLayout>-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="2dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/test_point" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="测点：" />
+                <Spinner
+                    android:id="@+id/point_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
-        <Spinner
-            android:id="@+id/point_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:entries="@array/measuring_point" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_no_data_warn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:textColor="@color/red"
+                android:visibility="gone"
+                android:textSize="13sp"  />
+            
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/line_chart"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp" >
+            </com.github.mikephil.charting.charts.LineChart>
 
-    <lecho.lib.hellocharts.view.LineChartView
-        android:id="@+id/chart"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="50dp"
-        android:layout_marginTop="20dp"/>
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

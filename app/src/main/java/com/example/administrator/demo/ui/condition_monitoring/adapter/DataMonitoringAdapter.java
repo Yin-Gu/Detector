@@ -1,6 +1,5 @@
 package com.example.administrator.demo.ui.condition_monitoring.adapter;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,7 +19,15 @@ import butterknife.ButterKnife;
 
 public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAdapter.ViewHolder> {
 
+    private final static String TAG = "DataMonitoringAdapter";
+
     private List<DataMonitoringItem> mItemList;
+
+    private ItemClickListener itemClickListener;
+
+    public void setItemClickListener(ItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
 
     public DataMonitoringAdapter(List<DataMonitoringItem> mItemList) {
         this.mItemList = mItemList;
@@ -33,46 +40,73 @@ public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAd
         return new ViewHolder(view);
     }
 
-    private ItemClickListener itemClickListener;
-
-    public void setItemClickListener(ItemClickListener itemClickListener) {
-        this.itemClickListener = itemClickListener;
-    }
-
     @Override
-    public void onBindViewHolder(ViewHolder holder,int position){
+    public void onBindViewHolder(ViewHolder holder, int position){
         //奇数项为白色
+        holder.view.setTag(position);
         if ((position & 0x1) == 0) {
             holder.view.setBackgroundColor(Color.WHITE);
         } else {
             holder.view.setBackgroundColor(Color.parseColor("#FFF5EE"));
         }
-        holder.view.setTag(position);
+
         DataMonitoringItem item = mItemList.get(position);
-        holder.equipmentName.setText(item.getEquipmentName());
+        holder.tv_motor_name_value.setText(item.getMotorName());
         if (item.getStatus()){
-            holder.status.setColorFilter(Color.RED);
+            holder.status.setColorFilter(Color.YELLOW);
         }else {
             holder.status.setColorFilter(Color.GREEN);
         }
-        holder.temperature.setText(item.getTemperature());
-        holder.current.setText(item.getElectricCurrent());
-        holder.voltage.setText(item.getVoltage());
+
+        String[] attrs = mItemList.get(position).getAttrs();
+        String[] values = mItemList.get(position).getValues();
+        int shortStart = 0, longStart = 6;
+        int shortEnd = 6, longEnd = 8;
+        for (int i = 0; i < attrs.length; i++) {
+            String text = attrs[i] + ": " + values[i];
+            if (attrs[i].length() < 10) {
+                holder.textViews[shortStart++].setText(text);
+            } else {
+                holder.textViews[longStart++].setText(text);
+            }
+        }
+
+        while (shortStart < shortEnd) {
+            holder.textViews[shortStart++].setVisibility(View.GONE);
+        }
+        while (longStart < longEnd) {
+            holder.textViews[longStart++].setVisibility(View.GONE);
+        }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.tv_equipment_name) TextView equipmentName;
+    @Override
+    public int getItemCount(){
+        return mItemList.size();
+    }
+
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.tv_motor_name_value) TextView tv_motor_name_value;
         @BindView(R.id.iv_LED) ImageView status;
-        @BindView(R.id.tv_temperature) TextView temperature;
-        @BindView(R.id.tv_current) TextView current;
-        @BindView(R.id.tv_voltage) TextView voltage;
+        @BindView(R.id.tv_item_1) TextView tv_item_1;
+        @BindView(R.id.tv_item_2) TextView tv_item_2;
+        @BindView(R.id.tv_item_3) TextView tv_item_3;
+        @BindView(R.id.tv_item_4) TextView tv_item_4;
+        @BindView(R.id.tv_item_5) TextView tv_item_5;
+        @BindView(R.id.tv_item_6) TextView tv_item_6;
+        @BindView(R.id.tv_item_7) TextView tv_item_7;
+        @BindView(R.id.tv_item_8) TextView tv_item_8;
 
         private View view;
+        private TextView[] textViews;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             this.view = view;
             ButterKnife.bind(this, view);
+            textViews = new TextView[]{tv_item_1, tv_item_2, tv_item_3, tv_item_4,
+                    tv_item_5, tv_item_6, tv_item_7, tv_item_8};
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -83,8 +117,4 @@ public class DataMonitoringAdapter extends RecyclerView.Adapter<DataMonitoringAd
         }
     }
 
-    @Override
-    public int getItemCount(){
-        return mItemList.size();
-    }
 }

@@ -2,9 +2,6 @@ package com.example.administrator.demo.ui.condition_monitoring;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.graphics.Color;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,8 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.administrator.demo.R;
 import com.example.administrator.demo.model.condition_monitoring.DataMonitoringItem;
@@ -24,40 +19,31 @@ import com.example.administrator.demo.net.ResponseParser;
 import com.example.administrator.demo.ui.common.CommonTitleActivity;
 import com.example.administrator.demo.ui.common.ItemClickListener;
 import com.example.administrator.demo.ui.condition_monitoring.adapter.DataMonitoringAdapter;
-import com.example.administrator.demo.utils.OkHttpUtils;
+import com.example.administrator.demo.conf.LoggingConfigure;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class DataMonitoringActivity extends CommonTitleActivity {
 
     private final static String TAG = "DataMonitoring";
+    private final static int UPDATE_DATA = 0;
 
     private List<DataMonitoringItem> dataMonitoringItemList = new ArrayList<>();
     private DataMonitoringAdapter dataMonitoringAdapter;
 
     private Unbinder unbinder;
     private volatile boolean endRequest;    //结束线程
-    private String abnormalMotors;
 
     @BindView(R.id.rv_data_monitoring) RecyclerView dataMonitoring;
-    @BindView(R.id.tv_abnormal_motors) TextView tv_abnormal_motors;
-    @BindView(R.id.tv_alarm_prompt) TextView tv_alarm_prompt;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -65,10 +51,9 @@ public class DataMonitoringActivity extends CommonTitleActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case 1:
-                    dismissLoadingDialog();
+                case UPDATE_DATA:
                     dataMonitoringAdapter.notifyDataSetChanged();
-                    updatePrompt();
+                    dismissLoadingDialog();
                     break;
                 default:
                     break;
@@ -81,41 +66,39 @@ public class DataMonitoringActivity extends CommonTitleActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_monitoring);
-        Log.d(TAG, "onCreate()");
-        unbinder = ButterKnife.bind(this);
-        endRequest = false;
 
+        unbinder = ButterKnife.bind(this);
         createDataMonitoring();
-        showLoadingDialog("查询中");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume()");
+
         endRequest = false;
-        sendRequest();
+        if (RequestSender.checkNetworkAvailable(this)) {
+            showLoadingDialog("查询中");
+            sendRequest();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause()");
+
         endRequest = true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy()");
+
         endRequest = true;
         unbinder.unbind();
     }
 
     @Override
-    public void beforeFinish() {
-
-    }
+    public void beforeFinish() {}
 
     @Override
     public void setTitle() {
@@ -132,9 +115,11 @@ public class DataMonitoringActivity extends CommonTitleActivity {
             @Override
             public void onItemClick(View v, int position) {
                 Intent intent = new Intent(DataMonitoringActivity.this, MonitoringDetailActivity.class);
-                int mid = dataMonitoringItemList.get(position).getMotorId();
-                intent.putExtra("mid", mid);
+                DataMonitoringItem item = dataMonitoringItemList.get(position);
                 intent.putExtra("guid", 0);
+                intent.putExtra("mid", item.getMotorId());
+                intent.putExtra("attrs", item.getAttrs());
+                intent.putExtra("motorName", item.getMotorName());
                 endRequest = true;
                 startActivity(intent);
             }
@@ -145,32 +130,39 @@ public class DataMonitoringActivity extends CommonTitleActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                String url = RequestManager.dataMonitoring;
+                String content = "{\"guid\":\"0\",\"equipmentName\":\"推土机\"}";
+
                 while (!endRequest) {
-                    String url = RequestManager.dataMonitoring;
-                    String content = "{\"guid\":\"0\",\"equipmentName\":\"推土机\"}";
                     String response = RequestSender.postRequest(url, content);
                     if (!endRequest) {
                         ResponseMessage message = null;
                         if (response != null) {
                             message = ResponseParser.parseResponse(response);
                         }
-                        if (message != null) {
-                            if (message.isSuccess()) {
-                                parseData(message.getData());
-                                Message msg = new Message();
-                                msg.what = 1;
-                                handler.sendMessage(msg);
-                                try {
-                                    Thread.sleep(RequestManager.REQUEST_FREQUENCE);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
+                        if (message != null && message.isSuccess()) {
+                            if (LoggingConfigure.LOGGING) {
+                                Log.d(TAG, message.getData());
+                            }
+
+                            parseData(message.getData());
+                            Message msg = Message.obtain();
+                            msg.what = UPDATE_DATA;
+                            handler.sendMessage(msg);
+                        } else if (message != null) {
+                            if (LoggingConfigure.LOGGING) {
                                 Log.d(TAG, "sendRequest(){ "
                                         + "errorCode: " + message.getErrorCode()
-                                        + "errorString: " + message.getErrorString());
+                                        + "errorString: " + message.getErrorString()
+                                        + "}");
                             }
                         }
+                    }
+
+                    try {
+                        Thread.sleep(RequestManager.REQUEST_RATE);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -178,64 +170,47 @@ public class DataMonitoringActivity extends CommonTitleActivity {
     }
 
     private void parseData(String dataJson) {
-        if (dataJson != null && dataJson.isEmpty()) {
+        if (dataJson == null || dataJson.isEmpty())
             return;
-        }
+
         try {
             JSONObject data = new JSONObject(dataJson);
             String equipmentName = data.getString("equipmentName");
             int guid = data.getInt("guid");
 
-            if (equipmentName.equals("推土机") && guid == 0) {
-                JSONArray motors = data.getJSONArray("motor");
-                StringBuilder builder = new StringBuilder();
-                dataMonitoringItemList.clear();
-                for (int i = 0; i < motors.length(); i++) {
-                    JSONObject motor = motors.getJSONObject(i);
-                    Integer mid = motor.getInt("mid");
-                    String motorName = motor.getString("motorName");
-                    String temperature = motor.getString("temperature");
-                    String current = motor.getString("current");
-                    String voltage = motor.getString("voltage");
-                    Boolean status = false;
-                    JSONArray statuses = motor.getJSONArray("status");
-                    Log.d(TAG, statuses.toString());
-                    for (int j = 0; j < statuses.length(); j++) {
-                        if (statuses.getInt(j) == 1) {
-                            status = true;
-                        }
-                    }
-                    if (status) {
-                        //设置异常提示文本
-                        builder.append(mid).append("、");
-                    }
-                    DataMonitoringItem item = new DataMonitoringItem(
-                            mid, motorName, status, temperature, voltage, current);
-                    dataMonitoringItemList.add(item);
+            if (!equipmentName.equals("推土机") || guid != 0)
+                return;
+
+            JSONArray motors = data.getJSONArray("motor");
+            dataMonitoringItemList.clear();
+            for (int i = 0; i < motors.length(); i++) {
+                JSONObject motor = motors.getJSONObject(i);
+                Integer mid = motor.getInt("mid");
+                String motorName = motor.getString("motorName");
+                JSONArray statuses = motor.getJSONArray("status");
+                JSONArray attrs = motor.getJSONArray("attrs");
+                JSONArray values = motor.getJSONArray("values");
+
+                String[] attrsArray = new String[attrs.length()];
+                String[] valuesArray = new String[values.length()];
+                Boolean status = false;
+                for (int j = 0; j < attrs.length(); j++) {
+                    attrsArray[j] = attrs.getString(j);
+                    valuesArray[j] = values.getString(j);
                 }
-                if (builder.length() != 0) {
-                    builder.setLength(builder.length() - 1);
-                    builder.append("号电机");
-                    abnormalMotors = builder.toString();
-                } else {
-                    abnormalMotors = "";
+                for (int j = 0; j < statuses.length(); j++) {
+                    if (statuses.getInt(j) == 1) {
+                        status = true;
+                        break;
+                    }
                 }
+
+                DataMonitoringItem item = new DataMonitoringItem(
+                        mid, motorName, status, attrsArray, valuesArray);
+                dataMonitoringItemList.add(item);
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d(TAG, "parseData()");
-        }
-    }
-
-    private void updatePrompt() {
-        if (abnormalMotors.isEmpty()) {
-            tv_abnormal_motors.setTextColor(Color.GRAY);
-            tv_abnormal_motors.setText(getString(R.string.no_alarm));
-        } else {
-            String promptText = abnormalMotors
-                    + getString(R.string.please_process);
-            tv_abnormal_motors.setTextColor(Color.RED);
-            tv_abnormal_motors.setText(promptText);
         }
     }
 

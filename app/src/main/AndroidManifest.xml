@@ -43,11 +43,22 @@
         <activity android:name=".ui.equipment_maintenance.HiddenManagementActivity" />
         <activity android:name=".ui.comprehensive_report.EventStatisticsActivity" />
         <activity android:name=".ui.comprehensive_report.DataAnalysisActivity" />
-        <activity android:name=".ui.login.LoginActivity">
+        <activity android:name=".ui.setting.SettingActivity" />
+        <activity android:name=".ui.condition_monitoring.ChartActivity"
+            android:screenOrientation="landscape" />
+        <activity android:name=".ui.login.LoginActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+
+        <activity android:name=".test.TestLineChart">
+        </activity>
+        <activity android:name=".test.TestLineChartLaunch">
+        </activity>
+        <activity android:name=".test.TestNewDataInterface" >
         </activity>
     </application>
 

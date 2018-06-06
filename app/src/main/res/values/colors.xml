@@ -13,6 +13,9 @@
 
     <color name="red">#FF0000</color>
     <color name="green">#00FF00</color>
+    <color name="yello">#EEEE00</color>
+    <color name="black">#000000</color>
+
     <color name="darkRed">#BA2221</color>
     <color name="darkYellow">#D2881D</color>
     <color name="darkGreen">#119211</color>
